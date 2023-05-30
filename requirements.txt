@@ -1,0 +1,6 @@
+gunicorn==20.0.4
+flask
+wtforms
+torchvision
+pytorch_lightning
+torchvision
