@@ -18,7 +18,8 @@ def predict(img):
     img =img.unsqueeze(0) # 1次元増やす
     #　推論
     y = torch.argmax(net(img), dim=1).cpu().detach().numpy()
-    return y
+    y_pred_proba = round((max(torch.softmax(net(img), dim=1)[0]) * 100).item(),2)
+    return y, y_pred_proba
 
 #　推論したラベルから犬か猫かを返す関数
 def getName(label):
@@ -54,6 +55,13 @@ def predicts():
             #　画像書き込み用バッファを確保
             buf = io.BytesIO()
             image = Image.open(file).convert('RGB')
+
+            # 画像の大きさを調整する
+            # 講義資料にはなく、追加しています！
+            new_width = 500
+            new_height = 500
+            image = image.resize((new_width, new_height))
+
             #　画像データをバッファに書き込む
             image.save(buf, 'png')
             #　バイナリデータを base64 でエンコードして utf-8 でデコード
@@ -62,9 +70,10 @@ def predicts():
             base64_data = 'data:image/png;base64,{}'.format(base64_str)
 
             # 入力された画像に対して推論
-            pred = predict(image)
+            pred, animalNameProba_ = predict(image)
             animalName_ = getName(pred)
-            return render_template('result.html', animalName=animalName_, image=base64_data)
+            
+            return render_template('result.html', animalName=animalName_, animalNameProba=animalNameProba_, image=base64_data)
 
     # GET メソッドの定義
     elif request.method == 'GET':
